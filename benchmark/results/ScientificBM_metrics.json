@@ -1,0 +1,148 @@
+{
+  "ours": {
+    "ncbi": {
+      "em": 44.32773109243697,
+      "as": 89.28571428571429,
+      "biotool_score": 87.1799864939281,
+      "count": 476
+    },
+    "uniprot": {
+      "em": 4.670912951167728,
+      "as": 97.45222929936305,
+      "biotool_score": 86.1283947581192,
+      "count": 471
+    },
+    "ensembl": {
+      "em": 42.299349240780906,
+      "as": 96.09544468546638,
+      "biotool_score": 93.06676478292833,
+      "count": 461
+    },
+    "overall": {
+      "em": 30.39772727272727,
+      "as": 94.2471590909091,
+      "biotool_score": 88.75562930902974,
+      "count": 1408
+    }
+  },
+  "run_info": {
+    "quant": "Q3_K_M",
+    "gguf": "Qwen3.8-27B-ScientificBM.Q3_K_M.gguf",
+    "n_ctx": 8192
+  },
+  "speed": {
+    "avg_prompt_tokens": 770.7095170454545,
+    "max_prompt_tokens": 3057,
+    "avg_gen_tokens": 73.9346590909091,
+    "avg_sec_per_sample": 12.96819996799935,
+    "total_gen_hours": 5.072007098595301
+  },
+  "error_taxonomy_pct": {
+    "right_tool_not_exact": 69.60227272727273,
+    "wrong_values": 58.38068181818182,
+    "missing_params": 10.511363636363637,
+    "extra_params": 12.784090909090908
+  },
+  "error_taxonomy_count": {
+    "right_tool_not_exact": 980,
+    "wrong_values": 822,
+    "missing_params": 148,
+    "extra_params": 180
+  },
+  "outperformed_overall": {
+    "score": [
+      "GPT-5.1",
+      "GPT-5.1-Codex",
+      "Gemini 3 Pro",
+      "Claude 4.5 Sonnet",
+      "Llama3.1-8B (base)",
+      "Qwen3-8B (base)",
+      "Qwen2.5-7B (base)",
+      "Qwen3-4B (base)",
+      "Qwen3-8B (BioTool-FT)"
+    ],
+    "em": [
+      "GPT-5.1",
+      "GPT-5.1-Codex",
+      "Gemini 3 Pro",
+      "Claude 4.5 Sonnet",
+      "Llama3.1-8B (base)",
+      "Qwen3-8B (base)",
+      "Qwen2.5-7B (base)",
+      "Qwen3-4B (base)",
+      "Qwen3-8B (BioTool-FT)"
+    ],
+    "as_": [
+      "GPT-5.1",
+      "GPT-5.1-Codex",
+      "Gemini 3 Pro",
+      "Claude 4.5 Sonnet",
+      "Llama3.1-8B (base)",
+      "Qwen3-8B (base)",
+      "Qwen2.5-7B (base)",
+      "Qwen3-4B (base)",
+      "Qwen3-8B (BioTool-FT)"
+    ]
+  },
+  "not_outperformed_overall": {
+    "score": [
+      "Llama3.1-8B (BioTool-FT)",
+      "Qwen2.5-7B (BioTool-FT)",
+      "Qwen3-4B (BioTool-FT)"
+    ],
+    "em": [
+      "Llama3.1-8B (BioTool-FT)",
+      "Qwen2.5-7B (BioTool-FT)",
+      "Qwen3-4B (BioTool-FT)"
+    ],
+    "as_": [
+      "Llama3.1-8B (BioTool-FT)",
+      "Qwen2.5-7B (BioTool-FT)",
+      "Qwen3-4B (BioTool-FT)"
+    ]
+  },
+  "outperformed_per_db_score": {
+    "ncbi": [
+      "GPT-5.1",
+      "GPT-5.1-Codex",
+      "Gemini 3 Pro",
+      "Claude 4.5 Sonnet",
+      "Llama3.1-8B (base)",
+      "Qwen3-8B (base)",
+      "Qwen2.5-7B (base)",
+      "Qwen3-4B (base)"
+    ],
+    "uniprot": [
+      "GPT-5.1",
+      "GPT-5.1-Codex",
+      "Llama3.1-8B (base)",
+      "Qwen3-8B (base)",
+      "Qwen2.5-7B (base)",
+      "Qwen3-4B (base)",
+      "Qwen3-8B (BioTool-FT)"
+    ],
+    "ensembl": [
+      "GPT-5.1",
+      "GPT-5.1-Codex",
+      "Gemini 3 Pro",
+      "Claude 4.5 Sonnet",
+      "Llama3.1-8B (base)",
+      "Qwen3-8B (base)",
+      "Qwen2.5-7B (base)",
+      "Qwen3-4B (base)",
+      "Qwen3-8B (BioTool-FT)",
+      "Qwen2.5-7B (BioTool-FT)"
+    ],
+    "overall": [
+      "GPT-5.1",
+      "GPT-5.1-Codex",
+      "Gemini 3 Pro",
+      "Claude 4.5 Sonnet",
+      "Llama3.1-8B (base)",
+      "Qwen3-8B (base)",
+      "Qwen2.5-7B (base)",
+      "Qwen3-4B (base)",
+      "Qwen3-8B (BioTool-FT)"
+    ]
+  }
+}
