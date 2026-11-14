@@ -18,8 +18,8 @@ HERE = Path(__file__).resolve().parent
 OUT = HERE.parent / "assets"
 OUT.mkdir(exist_ok=True)
 
-# Score if all 49 slow sequence-search samples that were not scored live had been perfect (see README).
-UPPER_BOUND_OVERALL = 92.2
+# Score if all 15 slow sequence-search samples that were not scored live had been perfect (see README).
+UPPER_BOUND_OVERALL = 92.7
 
 # ---- look & feel -----------------------------------------------------------
 for f in font_manager.findSystemFonts():
@@ -89,7 +89,7 @@ def chart_ranking():
     ax.xaxis.grid(True, color="#ECEEF2", zorder=0); ax.set_axisbelow(True)
     ax.legend(handles=LEGEND, loc="lower right", frameon=False, fontsize=9)
     titles(fig, "ScientificBM beats every frontier model on biomedical tool calling",
-           "Overall BioTool Score on the 1,408-question test set. Hatched part = score if the 49 unscored samples were all perfect.")
+           "Overall BioTool Score on the 1,408-question test set. Hatched part = score if the 15 unscored samples were all perfect.")
     footer(fig)
     fig.savefig(OUT / "01_overall_score_ranking.png", dpi=200); plt.close(fig)
 
@@ -114,8 +114,8 @@ def chart_vs_frontier():
     ax.set_ylim(0, 108); ax.set_ylabel("BioTool Score", fontsize=10)
     ax.yaxis.grid(True, color="#ECEEF2", zorder=0); ax.set_axisbelow(True)
     ax.legend(ncol=5, loc="upper center", bbox_to_anchor=(0.5, 1.09), frameon=False, fontsize=9)
-    titles(fig, "Clearly ahead of the frontier models on NCBI and Ensembl, close behind on UniProt",
-           "BioTool Score by database. On UniProt, Gemini 3 Pro and Claude 4.5 Sonnet are about 1-2 points ahead of ScientificBM.")
+    titles(fig, "Ahead of every frontier model on every database",
+           "BioTool Score by database. The narrowest lead is on UniProt (90.8 vs 87.8 for Gemini 3 Pro).")
     footer(fig)
     fig.savefig(OUT / "02_vs_frontier_by_database.png", dpi=200); plt.close(fig)
 
@@ -169,8 +169,8 @@ def chart_gap():
     ax.set_yticks(range(len(data))); ax.set_yticklabels([SHORT(n) for n, _, _ in data], fontsize=10)
     ax.set_xlim(-14, 42); ax.set_xlabel("ScientificBM score minus the other model's score (points)", fontsize=10)
     ax.xaxis.grid(True, color="#ECEEF2", zorder=0); ax.set_axisbelow(True)
-    titles(fig, "Ahead of 9 of the 12 models, behind 3 small BioTool fine-tunes",
-           "Overall BioTool Score difference. Green = ScientificBM is ahead. Uses the cautious score of 88.8.")
+    titles(fig, "Ahead of 11 of the 12 models, behind only the Qwen3-4B fine-tune",
+           "Overall BioTool Score difference. Green = ScientificBM is ahead. Uses the cautious score of 91.6.")
     footer(fig)
     fig.savefig(OUT / "04_gap_vs_each_model.png", dpi=200); plt.close(fig)
 

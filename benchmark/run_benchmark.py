@@ -192,14 +192,16 @@ _PARAM_RE = re.compile(r"<parameter=([^>\n]+)>(.*?)(?=</parameter>|<parameter=|\
 
 
 TYPE_PRIOR = {}   # (function, param) -> dominant JSON type of the GOLD value in BioTool_train.json
+NONE_SEEN = set() # (function, param) pairs whose GOLD value is JSON null somewhere in BioTool_train.json
 
 
 def build_type_prior():
-    """The Qwen XML tool-call format prints 1 and "1" identically, so types must be restored when decoding.
-    Schema types are used first; for params the schema omits (e.g. blast timeout) or declares as a union with
-    string, fall back to the dominant gold type in the TRAIN split (no test leakage)."""
-    global TYPE_PRIOR
-    cnt = {}
+    """The Qwen XML tool-call format prints 1 and "1" identically (and null and "null"), so types must be restored
+    when decoding. Schema types are used first; for params the schema omits (e.g. blast timeout) or declares as a
+    union with string, fall back to the dominant gold type in the TRAIN split (no test leakage).
+    The text `null` becomes a real JSON null only for params whose gold value is null somewhere in the TRAIN split."""
+    global TYPE_PRIOR, NONE_SEEN
+    cnt, none_seen = {}, set()
     for ex in json.load(open(REPO / "data" / "BioTool_train.json", encoding="utf-8")):
         for turn in ex.get("conversations", []):
             if (turn.get("from") or turn.get("role") or "").lower() != "function_call":
@@ -209,9 +211,13 @@ def build_type_prior():
             except Exception:
                 continue
             for k, v in (call.get("arguments") or {}).items():
-                cnt.setdefault((call.get("name"), k), Counter())[type(v).__name__] += 1
+                if v is None:
+                    none_seen.add((call.get("name"), k))
+                else:
+                    cnt.setdefault((call.get("name"), k), Counter())[type(v).__name__] += 1
     TYPE_PRIOR = {k: c.most_common(1)[0][0] for k, c in cnt.items()}
-    print(f"  type prior built for {len(TYPE_PRIOR)} (function, param) pairs from the train split")
+    NONE_SEEN = none_seen
+    print(f"  type prior built for {len(TYPE_PRIOR)} (function, param) pairs; {len(NONE_SEEN)} pairs can be null")
 
 
 def _json_nonstring(s):
@@ -233,6 +239,9 @@ def coerce_value(v, spec, prior=None):
             j = _json_nonstring(v.strip())
             if j is not None:
                 return j
+        j = _json_nonstring(v.strip())
+        if isinstance(j, (list, dict)):
+            return j
         return v
     s = v.strip()
     if "boolean" in types and s.lower() in ("true", "false"):
@@ -279,6 +288,9 @@ def to_official_call_text(raw, tools):
         elif v.startswith("\n"): v = v[1:]
         if v.endswith("\r\n"): v = v[:-2]
         elif v.endswith("\n"): v = v[:-1]
+        if v.strip() == "null" and (name, k) in NONE_SEEN:
+            args[k] = None
+            continue
         args[k] = coerce_value(v, props.get(name, {}).get(k), TYPE_PRIOR.get((name, k)))
     return "<tool_call>\n" + json.dumps({"name": name, "arguments": args}, ensure_ascii=False) + "\n</tool_call>"
 

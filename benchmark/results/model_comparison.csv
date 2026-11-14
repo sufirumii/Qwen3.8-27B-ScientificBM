@@ -1,5 +1,5 @@
 model,group,score_ncbi,score_uniprot,score_ensembl,score_overall,em_ncbi,em_uniprot,em_ensembl,em_overall,as_ncbi,as_uniprot,as_ensembl,as_overall
-Qwen3.8-27B-ScientificBM (ours),Ours,87.18,86.13,93.07,88.76,44.33,4.67,42.3,30.4,89.29,97.45,96.1,94.25
+Qwen3.8-27B-ScientificBM (ours),Ours,89.5,90.8,94.6,91.6,44.3,8.5,42.3,31.7,91.6,100.0,97.6,96.4
 GPT-5.1,Proprietary,15.5,78.7,72.8,55.4,0.0,1.7,8.9,3.5,16.6,97.9,79.4,64.4
 GPT-5.1-Codex,Proprietary,14.8,80.5,74.5,56.3,0.0,1.7,6.3,2.6,16.2,98.3,80.5,64.7
 Gemini 3 Pro,Proprietary,72.5,87.8,77.3,79.2,3.2,2.1,16.3,7.1,76.7,99.8,82.0,86.2

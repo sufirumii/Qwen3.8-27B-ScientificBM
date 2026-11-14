@@ -35,8 +35,8 @@ In short:
 
 - **It chose the correct tool for all 1,408 test questions.** Not one wrong tool and not one broken answer.
 - **It beat all four frontier models** from the BioTool paper (Claude 4.5 Sonnet, Gemini 3 Pro, GPT-5.1 and GPT-5.1-Codex) on the overall score.
-- **Out of the 12 models in the paper, it is ahead of 9.** The three it did not beat are small models (4B to 8B) that were fine-tuned on the same data.
-- **It is strongest on Ensembl** (score 93.1) and weakest at getting every setting exactly right (Exact Match 30.4%).
+- **Out of the 12 models in the paper, it is ahead of 11.** The one it did not beat is the small Qwen3-4B model that was fine-tuned on the same data.
+- **It is strongest on Ensembl** (score 94.6) and weakest at getting every setting exactly right (Exact Match 31.7%).
 
 ---
 
@@ -50,7 +50,7 @@ The idea is simple. Show the model thousands of examples of "question → correc
 
 **2. Same format as real use.** Each example is written in the model's own chat format, with "thinking" switched off. We want a short, clean tool call, not a long essay.
 
-**3. No cut-off examples.** Any example longer than 3,072 tokens was dropped instead of being trimmed. A trimmed tool call is a broken tool call, and we did not want the model to learn from those.
+**3. No cut-off examples.** Any example longer than 3,072 tokens was dropped instead of being trimmed. That removed 139 of the 5,632 examples, leaving 5,493 for training. A trimmed tool call is a broken tool call, and we did not want the model to learn from those.
 
 **4. Train only a small part (QLoRA).** A 27-billion-parameter model is huge, so we kept it compressed to 4-bit and trained only small add-on layers called LoRA adapters. This gives most of the benefit of full training at a fraction of the memory.
 
@@ -61,12 +61,12 @@ The idea is simple. Show the model thousands of examples of "question → correc
 | Setting | Value |
 |---|---|
 | Starting model | Qwen3.8-27B (4-bit, via Unsloth) |
-| Training data | BioTool train split (5,632 examples) |
+| Training data | BioTool train split: 5,632 examples, 5,493 used (139 over-long ones dropped) |
 | Method | QLoRA, adapters on attention and MLP layers |
 | LoRA size | rank 16 |
 | Learning rate | 2e-4 |
 | Batch size | 16 (1 example × 16 accumulation steps) |
-| Passes over the data | 1 epoch |
+| Passes over the data | 1 epoch (344 steps, about 1 hour 45 minutes) |
 | Longest example | 3,072 tokens |
 | GPU | One A100 40GB |
 
@@ -102,9 +102,9 @@ The full benchmark script is in [`benchmark/run_benchmark.py`](benchmark/run_ben
 
 | Score (%) | NCBI | UniProt | Ensembl | **Overall** |
 |---|---|---|---|---|
-| Exact Match | 44.3 | 4.7 | 42.3 | **30.4** |
-| API Success | 89.3 | 97.5 | 96.1 | **94.2** |
-| BioTool Score | 87.2 | 86.1 | 93.1 | **88.8** |
+| Exact Match | 44.3 | 8.5 | 42.3 | **31.7** |
+| API Success | 91.6 | 100.0 | 97.6 | **96.4** |
+| BioTool Score | 89.5 | 90.8 | 94.6 | **91.6** |
 
 ### Against the models in the BioTool paper
 
@@ -113,9 +113,9 @@ Sorted by overall BioTool Score. Numbers for the other models are from the paper
 | # | Model | Type | BioTool Score | Exact Match | API Success | Did we beat it? |
 |---|---|---|---|---|---|---|
 | 1 | Qwen3-4B + BioTool fine-tune | Small, fine-tuned | 93.6 | 42.4 | 97.8 | No |
-| 2 | Llama3.1-8B + BioTool fine-tune | Small, fine-tuned | 91.2 | 31.2 | 96.6 | No |
-| 3 | Qwen2.5-7B + BioTool fine-tune | Small, fine-tuned | 89.2 | 30.8 | 95.1 | No |
-| **4** | **Qwen3.8-27B-ScientificBM (ours)** | **Fine-tuned** | **88.8** | **30.4** | **94.2** | |
+| **2** | **Qwen3.8-27B-ScientificBM (ours)** | **Fine-tuned** | **91.6** | **31.7** | **96.4** | |
+| 3 | Llama3.1-8B + BioTool fine-tune | Small, fine-tuned | 91.2 | 31.2 | 96.6 | **Yes** (narrowly, by 0.4) |
+| 4 | Qwen2.5-7B + BioTool fine-tune | Small, fine-tuned | 89.2 | 30.8 | 95.1 | **Yes** |
 | 5 | Qwen3-8B + BioTool fine-tune | Small, fine-tuned | 86.1 | 26.9 | 93.7 | **Yes** |
 | 6 | Claude 4.5 Sonnet | Frontier | 81.4 | 6.5 | 89.4 | **Yes** |
 | 7 | Gemini 3 Pro | Frontier | 79.2 | 7.1 | 86.2 | **Yes** |
@@ -132,13 +132,13 @@ Sorted by overall BioTool Score. Numbers for the other models are from the paper
 
 ![Frontier comparison by database](assets/02_vs_frontier_by_database.png)
 
-The lead is biggest on NCBI and Ensembl. On UniProt, Gemini 3 Pro and Claude 4.5 Sonnet are about 1 to 2 points ahead of us.
+The model is ahead of every frontier model on all three databases. The lead is biggest on NCBI and Ensembl, and narrowest on UniProt (90.8 vs 87.8 for Gemini 3 Pro).
 
 ### Picking the tool vs. getting the settings exactly right
 
 ![Exact Match vs API Success](assets/03_exact_match_vs_api_success.png)
 
-Frontier models usually produce a call that runs, but they rarely match the reference settings exactly (Exact Match of 7% or less). Fine-tuning on BioTool changes this: our model's Exact Match is about four times higher than the best frontier model's.
+Frontier models usually produce a call that runs, but they rarely match the reference settings exactly (Exact Match of 7% or less). Fine-tuning on BioTool changes this: our model's Exact Match is more than four times higher than the best frontier model's.
 
 ---
 
@@ -150,20 +150,20 @@ Frontier models usually produce a call that runs, but they rarely match the refe
 - A fine-tuned open model beats expensive frontier models at this specific job.
 
 **What is still hard**
-- Getting every optional setting exactly right. About 58% of calls had at least one setting that differed from the reference. Most of these are small choices, like which fields to return or how to sort the results, and many of those calls still run fine.
-- UniProt Exact Match is low (4.7%) for every model in the paper too, probably because there are many valid ways to write the same search.
+- Getting every optional setting exactly right. Most calls still differ from the reference in at least one optional setting, such as which fields to return or how to sort the results, and many of those calls still run fine.
+- UniProt Exact Match is still low (8.5%), as it is for every model in the paper, probably because there are many valid ways to write the same search.
 
-**A fair comparison with smaller models.** A 27B model fine-tuned for one epoch with QLoRA ends up level with the 7B to 8B fine-tuned models, not above them. Bigger did not automatically mean better here, and the small 4B model from the paper is still the best of the group.
+**A fair comparison with smaller models.** A 27B model fine-tuned for one epoch with QLoRA ends up slightly ahead of the 7B to 8B fine-tuned models, but behind the small 4B model from the paper. Bigger did not automatically mean better here.
 
 ---
 
 ## How to read these numbers honestly
 
-- **The BioTool Score of 88.8 is a cautious floor.** 49 of the 1,408 questions (3.5%) are long DNA/protein sequence searches (BLAST). The live NCBI service is very slow for these, so we did not wait for them. We counted them as failures. If all 49 had been perfect, the overall score would be 92.2, so the true score lies between **88.8 and 92.2**. At the top of that range the model would also pass the Llama and Qwen2.5 fine-tunes, but not the 4B one.
-- **Exact Match is not affected** by those 49 questions. It only compares calls and does not run them.
+- **The BioTool Score of 91.6 is a cautious floor.** 15 of the 1,408 questions (1.1%) are long DNA/protein sequence searches (BLAST). The live NCBI service is very slow for these and did not finish them in the time we allowed, so we counted them as failures. If all 15 had been perfect, the overall score would be 92.7, so the true score lies between **91.6 and 92.7**. On another 22 BLAST questions the reference call itself failed on the live NCBI service, so no model can earn similarity credit there (this is how the official scoring works). Because of this, the best model's 93.6 cannot be reached.
+- **Exact Match is not affected** by those 15 questions. It only compares calls and does not run them.
 - **One run, not three.** The paper averages three runs. We ran the model once, in 3-bit form.
-- **The databases change over time.** Live results from NCBI, UniProt and Ensembl can move a little between runs.
-- **A small decoding detail was improved after this run.** The model writes values as text, for example `120.0`. Turning those back into the right type (number or text) was tightened afterwards. It affects about 7% of the predictions, mainly Exact Match and a few calls. The script in this repo has the improved version, and the numbers above will be updated after a re-run.
+- **The databases change over time.** Live results from NCBI, UniProt and Ensembl can move a little between runs. A gap as small as 0.4 points, like our lead over the Llama fine-tune, is small enough for this drift to matter.
+- **A re-check was done after the first run.** The first run turned some of the model's text values (for example `null` and numbers) back into the wrong type. We fixed this and re-checked the 325 affected samples on the live services. The scores above include that re-check.
 
 ---
 
@@ -235,11 +235,11 @@ Always turn thinking off (`enable_thinking=False`). The model was trained for sh
 │   └── train_biotool.py         the fine-tuning script (Unsloth QLoRA)
 └── benchmark/
     ├── run_benchmark.py         the benchmark script (Kaggle T4, official BioTool scoring)
+    ├── revalidate_after_decoding_fix.py   re-checks the samples affected by the decoding fix
     ├── make_charts.py           rebuilds the graphs from the results file
     └── results/
         ├── model_comparison.csv   our scores next to the paper's models
-        ├── ScientificBM_metrics.json
-        └── ScientificBM_per_tool.csv
+        └── ScientificBM_metrics.json
 ```
 
 ### Re-run the fine-tuning
